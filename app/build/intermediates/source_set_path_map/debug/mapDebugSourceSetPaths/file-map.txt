@@ -36,9 +36,9 @@ com.fieldspec.app-annotation-experimental-1.4.0-34 C:\Users\Chase Mallory\.gradl
 com.fieldspec.app-material-ripple-release-35 C:\Users\Chase Mallory\.gradle\caches\transforms-4\e3a0e276864838f3d785f8a6bb1b6d73\transformed\material-ripple-release\res
 com.fieldspec.app-core-runtime-2.2.0-36 C:\Users\Chase Mallory\.gradle\caches\transforms-4\e46a3fd3e9e097c82b978b7660c9fbc1\transformed\core-runtime-2.2.0\res
 com.fieldspec.app-foundation-layout-release-37 C:\Users\Chase Mallory\.gradle\caches\transforms-4\fca986c3ec4c673dc2b4a7feb6c08707\transformed\foundation-layout-release\res
-com.fieldspec.app-resValues-38 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\build\generated\res\resValues\debug
-com.fieldspec.app-packageDebugResources-39 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.fieldspec.app-packageDebugResources-40 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.fieldspec.app-debug-41 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.fieldspec.app-debug-42 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\debug\res
-com.fieldspec.app-main-43 C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\res
+com.fieldspec.app-resValues-38 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\build\generated\res\resValues\debug
+com.fieldspec.app-packageDebugResources-39 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.fieldspec.app-packageDebugResources-40 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.fieldspec.app-debug-41 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.fieldspec.app-debug-42 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\debug\res
+com.fieldspec.app-main-43 C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\res

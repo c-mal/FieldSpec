@@ -70,19 +70,33 @@ fun SpectrumScreen(
             )
             
             // ── Top banner: CPM + sparkline + controls ───────────────────────
-            // rememberUpdatedState ensures the coroutine always reads the latest
-            // totalCpm even though LaunchedEffect(Unit) only starts once.
+            // rememberUpdatedState ensures the coroutine always reads the latest values
+            // even though LaunchedEffect(Unit) only starts once.
             val latestCpm by rememberUpdatedState(spectrumState.totalCpm)
+            val latestRoiCpm by rememberUpdatedState(spectrumState.roiCpm)
+            val latestIsAcquiring by rememberUpdatedState(isAcquiring)
             var cpmHistory by remember { mutableStateOf(FloatArray(0)) }
+            var roiCpmHistory by remember { mutableStateOf(FloatArray(0)) }
             LaunchedEffect(Unit) {
                 while (true) {
                     delay(500)
+                    // Freeze both histories when acquisition is stopped
+                    if (!latestIsAcquiring) continue
+                    // Append total CPM
                     val cur = latestCpm.toFloat()
                     val prev = cpmHistory
                     cpmHistory = if (prev.size >= 120) {
                         FloatArray(120) { i -> if (i < 119) prev[i + 1] else cur }
                     } else {
                         FloatArray(prev.size + 1) { i -> if (i < prev.size) prev[i] else cur }
+                    }
+                    // Append ROI CPM in sync
+                    val roiCur = latestRoiCpm.toFloat()
+                    val roiPrev = roiCpmHistory
+                    roiCpmHistory = if (roiPrev.size >= 120) {
+                        FloatArray(120) { i -> if (i < 119) roiPrev[i + 1] else roiCur }
+                    } else {
+                        FloatArray(roiPrev.size + 1) { i -> if (i < roiPrev.size) roiPrev[i] else roiCur }
                     }
                 }
             }
@@ -114,27 +128,48 @@ fun SpectrumScreen(
 
                 // Rolling CPM sparkline — 60 seconds at 0.5s resolution
                 val sparkData = cpmHistory
-                if (sparkData.size >= 2) {
+                val roiSparkData = roiCpmHistory
+                if (sparkData.size >= 2 || roiSparkData.size >= 2) {
                     androidx.compose.foundation.Canvas(
                         modifier = Modifier
                             .width(120.dp)
                             .height(38.dp)
                     ) {
-                        val maxC = sparkData.maxOrNull()?.coerceAtLeast(1f) ?: 1f
                         val w = size.width
                         val h = size.height
-                        val dx = w / (sparkData.size - 1)
-                        for (k in 0 until sparkData.size - 1) {
-                            val x1 = k * dx
-                            val y1 = h - (sparkData[k] / maxC) * h
-                            val x2 = (k + 1) * dx
-                            val y2 = h - (sparkData[k + 1] / maxC) * h
-                            drawLine(
-                                color = Color(0xFF00E5FF),
-                                start = androidx.compose.ui.geometry.Offset(x1, y1),
-                                end = androidx.compose.ui.geometry.Offset(x2, y2),
-                                strokeWidth = 2.5f
-                            )
+                        // Total CPM line — cyan, independently auto-scaled
+                        if (sparkData.size >= 2) {
+                            val maxC = sparkData.maxOrNull()?.coerceAtLeast(1f) ?: 1f
+                            val dx = w / (sparkData.size - 1)
+                            for (k in 0 until sparkData.size - 1) {
+                                val x1 = k * dx
+                                val y1 = h - (sparkData[k] / maxC) * h
+                                val x2 = (k + 1) * dx
+                                val y2 = h - (sparkData[k + 1] / maxC) * h
+                                drawLine(
+                                    color = Color(0xFF00E5FF),
+                                    start = androidx.compose.ui.geometry.Offset(x1, y1),
+                                    end = androidx.compose.ui.geometry.Offset(x2, y2),
+                                    strokeWidth = 2.5f
+                                )
+                            }
+                        }
+                        // ROI CPM overlay — amber, independently auto-scaled
+                        if (roiSparkData.size >= 2) {
+                            val roiMaxC = roiSparkData.maxOrNull()?.coerceAtLeast(1f) ?: 1f
+                            val roiDx = w / (roiSparkData.size - 1)
+                            for (k in 0 until roiSparkData.size - 1) {
+                                val x1 = k * roiDx
+                                val y1 = h - (roiSparkData[k] / roiMaxC) * h
+                                val x2 = (k + 1) * roiDx
+                                val y2 = h - (roiSparkData[k + 1] / roiMaxC) * h
+                                drawLine(
+                                    color = Color(0xFFFF6D00),
+                                    start = androidx.compose.ui.geometry.Offset(x1, y1),
+                                    end = androidx.compose.ui.geometry.Offset(x2, y2),
+                                    strokeWidth = 2.5f
+                                )
+                            }
                         }
                     }
                 }

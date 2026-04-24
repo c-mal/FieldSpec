@@ -9,27 +9,27 @@
 9        android:targetSdkVersion="34" />
 10
 11    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-11-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:4:5-71
-11-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:4:22-68
+11-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:4:5-71
+11-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:4:22-68
 12    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-12-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:5:5-77
-12-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:5:22-74
+12-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:5:5-77
+12-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:5:22-74
 13    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-13-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:6:5-88
-13-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:6:22-85
+13-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:6:5-88
+13-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:6:22-85
 14    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-14-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:7:5-77
-14-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:7:22-74
+14-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:7:5-77
+14-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:7:22-74
 15
 16    <uses-feature android:name="android.hardware.usb.host" />
-16-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:9:5-62
-16-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:9:19-59
+16-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:9:5-62
+16-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:9:19-59
 17    <uses-feature
-17-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:10:5-87
+17-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:10:5-87
 18        android:name="android.hardware.microphone"
-18-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:10:19-61
+18-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:10:19-61
 19        android:required="true" />
-19-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:10:62-85
+19-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:10:62-85
 20
 21    <permission
 21-->[androidx.core:core:1.12.0] C:\Users\Chase Mallory\.gradle\caches\transforms-4\040ff9233650c29a769b180cb36b9aee\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
@@ -43,50 +43,50 @@
 25-->[androidx.core:core:1.12.0] C:\Users\Chase Mallory\.gradle\caches\transforms-4\040ff9233650c29a769b180cb36b9aee\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 26
 27    <application
-27-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:12:5-34:19
+27-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:12:5-34:19
 28        android:allowBackup="true"
-28-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:13:9-35
+28-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:13:9-35
 29        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 29-->[androidx.core:core:1.12.0] C:\Users\Chase Mallory\.gradle\caches\transforms-4\040ff9233650c29a769b180cb36b9aee\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 30        android:debuggable="true"
 31        android:extractNativeLibs="false"
 32        android:icon="@mipmap/ic_launcher"
-32-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:14:9-43
+32-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:14:9-43
 33        android:label="FieldSpec"
-33-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:15:9-34
+33-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:15:9-34
 34        android:supportsRtl="true"
-34-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:16:9-35
+34-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:16:9-35
 35        android:testOnly="true" >
 36        <activity
-36-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:18:9-26:20
+36-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:18:9-26:20
 37            android:name="com.fieldspec.MainActivity"
-37-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:19:13-41
+37-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:19:13-41
 38            android:exported="true"
-38-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:20:13-36
+38-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:20:13-36
 39            android:screenOrientation="sensorLandscape" >
-39-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:21:13-56
+39-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:21:13-56
 40            <intent-filter>
-40-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:22:13-25:29
+40-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:22:13-25:29
 41                <action android:name="android.intent.action.MAIN" />
-41-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:23:17-69
-41-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:23:25-66
+41-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:23:17-69
+41-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:23:25-66
 42
 43                <category android:name="android.intent.category.LAUNCHER" />
-43-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:24:17-77
-43-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:24:27-74
+43-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:24:17-77
+43-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:24:27-74
 44            </intent-filter>
 45        </activity>
 46
 47        <service
-47-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:28:9-32:58
+47-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:28:9-32:58
 48            android:name="com.fieldspec.service.AcquisitionService"
-48-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:29:13-55
+48-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:29:13-55
 49            android:enabled="true"
-49-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:30:13-35
+49-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:30:13-35
 50            android:exported="false"
-50-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:31:13-37
+50-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:31:13-37
 51            android:foregroundServiceType="microphone" />
-51-->C:\Users\Chase Mallory\Desktop\Projects & Research\Gamma Spectrometer Android\app\src\main\AndroidManifest.xml:32:13-55
+51-->C:\Users\Chase Mallory\Documents\GitHub\FieldSpec-App\app\src\main\AndroidManifest.xml:32:13-55
 52
 53        <provider
 53-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Chase Mallory\.gradle\caches\transforms-4\c3bcd5f28c8b5992217fabc367f2211c\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
