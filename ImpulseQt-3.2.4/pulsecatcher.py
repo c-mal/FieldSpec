@@ -1,0 +1,400 @@
+# pulsecatcher.py
+
+import pyaudio
+import wave
+import math
+import threading
+import time
+import datetime
+import logging
+import queue
+import shared
+import struct
+import functions as fn
+import gps_main  # at top of file is better, but ok here for first test
+
+
+from shared import logger
+
+# Function reads audio stream and finds pulses then outputs time, pulse height, and distortion
+def pulsecatcher(mode, run_flag, run_flag_lock):
+    # Start timer
+    t0                  = datetime.datetime.now()
+    time_start          = time.time()
+    time_last_save      = int(time_start)
+    time_last_save_time = int(time_start) 
+    array_hmp            = []
+    spec_notes          = ""
+    dropped_counts      = 0
+    flip_left           = 1
+    flip_right          = 1
+    last_interval_save  = None  # Track last time a 3D histogram was appended
+
+    # Load settings from global variables
+    with shared.write_lock:
+        bins            = shared.bins
+        last_histogram  = [0] * bins
+        filename        = shared.filename
+        #filename_hmp    = shared.filename_hmp
+        device          = shared.device
+        sample_rate     = shared.sample_rate
+        chunk_size      = shared.chunk_size
+        threshold       = (shared.threshold * shared.bin_size)
+        tolerance       = shared.tolerance
+        bin_size        = shared.bin_size
+        max_counts      = shared.max_counts
+        sample_length   = shared.sample_length
+        coeff_1         = shared.coeff_1
+        coeff_2         = shared.coeff_2
+        coeff_3         = shared.coeff_3
+        flip            = shared.flip
+        max_seconds     = shared.max_seconds
+        t_interval      = shared.t_interval
+        peakshift       = shared.peakshift
+        peak            = int((sample_length - 1) / 2) + peakshift
+        spec_notes      = shared.spec_notes
+        stereo          = shared.stereo
+        coi_window      = shared.coi_window
+        left_shape      = shared.mean_shape_left
+        right_shape     = shared.mean_shape_right
+        # Set global vars
+        shared.elapsed         = 0
+        shared.counts          = 0
+        shared.dropped_counts  = 0
+        shared.histogram       = [0] * bins
+        shared.count_history   = []
+        shared.histogram_hmp   = [] 
+
+    # Fixed variables
+    right_threshold = threshold  
+    audio_format    = pyaudio.paInt16
+    p               = pyaudio.PyAudio()
+    device_channels = p.get_device_info_by_index(device)['maxInputChannels']
+    samples         = []
+    pulses          = []
+    left_data       = []
+    right_data      = []
+    last_count      = 0
+    local_elapsed   = 0
+    local_counts    = 0
+    full_histogram  = [0] * bins
+    local_count_history = []
+    right_pulses    = []
+    hmp_buffer      = []
+    interval_counter = 0  
+
+    # Open the selected audio input device
+    channels = 2 if stereo else 1
+    try:
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=channels,
+            rate=sample_rate,
+            input=True,
+            output=False,
+            frames_per_buffer=chunk_size,
+            input_device_index=device,
+        )
+    except Exception as e:
+        
+        with shared.write_lock: shared.doing = f"[ERROR] Device not selected: {e}"
+
+    save_queue  = queue.Queue()
+    save_thread = threading.Thread(target=save_data, args=(save_queue,))
+    save_thread.start()
+    
+    # Main pulsecatcher while loop
+    while shared.run_flag.is_set() and local_counts < max_counts and local_elapsed <= max_seconds:
+        # Read one chunk of audio data from stream into memory.
+        data = stream.read(chunk_size, exception_on_overflow=False)
+        
+        # Convert hex values into a list of decimal values
+        values = list(struct.unpack(f"<{chunk_size * channels}h", data))
+
+
+        if channels == 1:
+            # Mono: use all samples as left channel
+            left_channel  = values
+            right_channel = []
+        else:
+            # Stereo (2-channel): interleaved L,R,L,R,...
+            left_channel  = values[0::2]
+            right_channel = values[1::2]
+            
+
+        # Flip logic simplified
+        flip_settings = {11: (1, 1), 12: (1, -1), 21: (-1, 1), 22: (-1, -1)}
+        flip_left, flip_right = flip_settings.get(flip, (1, 1))
+
+        # Include right channel if mode == 4:
+        if mode == 4:
+            right_pulses = []  # Reset right pulse array
+            
+            for i in range(len(right_channel) - sample_length):
+                samples = right_channel[i:i + sample_length]
+                samples = [flip_right * x for x in samples]
+                height = fn.pulse_height(samples)
+                if samples[peak] == max(samples) and abs(height) > right_threshold and samples[peak] < 32768:
+                    right_pulses.append((i + peak, height))
+
+        # Sliding window approach to avoid re-slicing the array each time
+        samples = left_channel[:sample_length]
+        samples = [flip_left * x for x in samples]
+        
+        for i in range(len(left_channel) - sample_length):
+            height = fn.pulse_height(samples)
+            if samples[peak] == max(samples) and abs(height) > threshold and samples[peak] < 32768:
+                
+                # Optimize coincident pulse check by using binary search or range filter
+                if mode == 4:
+                    coincident_pulse = next((rp for rp in right_pulses if i + peak - coi_window <= rp[0] <= i + peak + coi_window), None)
+                    if not coincident_pulse:
+                        continue  # Skip if no coincident pulse found
+
+                # Process the pulse as normal
+                normalised = fn.normalise_pulse(samples)
+                distortion = fn.distortion(normalised, left_shape)
+
+                if distortion > tolerance:
+                    dropped_counts += 1
+                elif distortion < tolerance:
+                    bin_index = int(height / bin_size)
+                    if bin_index < bins:
+                        full_histogram[bin_index] += 1
+                        local_counts += 1
+
+            # Update sliding window instead of re-slicing
+            samples.pop(0)
+            samples.append(flip_left * left_channel[i + sample_length])
+
+        # Time capture
+        t1 = datetime.datetime.now()  
+        time_this_save = time.time()
+        local_elapsed = int(time_this_save - time_start)
+
+        # Update shared variables every second
+        if time_this_save - time_last_save >= 1:
+            counts_per_sec = local_counts - last_count
+
+            with shared.write_lock:
+                shared.cps              = counts_per_sec
+                shared.counts           = local_counts
+                shared.elapsed          = local_elapsed
+                shared.spec_notes       = spec_notes
+                shared.dropped_counts   = dropped_counts
+                if mode in (2, 4):
+                    shared.histogram    = full_histogram.copy()  
+                shared.count_history.append(counts_per_sec)
+
+            interval_counter, last_histogram = update_mode_3_data(
+                mode, shared, full_histogram, last_histogram,
+                hmp_buffer, interval_counter, t_interval, bins,
+                time_this_save, save_queue,
+                {
+                    't0': t0,
+                    't1': t1,
+                    'bins': bins,
+                    'local_counts': local_counts,
+                    'dropped_counts': dropped_counts,
+                    'local_elapsed': local_elapsed,
+                    'coeff_1': coeff_1,
+                    'coeff_2': coeff_2,
+                    'coeff_3': coeff_3,
+                    'device': device,
+                    'location': '',
+                    'spec_notes': spec_notes,
+                    'local_count_history': local_count_history
+                },
+                filename
+            )
+
+
+            last_count = local_counts
+            time_last_save = time_this_save
+            local_count_history.append(counts_per_sec)
+
+        # Save spectrum file every 30 seconds or on STOP
+        if time_this_save - time_last_save_time >= 30 or not shared.run_flag.is_set():
+            queue_save_data(
+                save_queue,
+                {
+                    't0': t0,
+                    't1': t1,
+                    'bins': bins,
+                    'local_counts': local_counts,
+                    'dropped_counts': dropped_counts,
+                    'local_elapsed': local_elapsed,
+                    'coeff_1': coeff_1,
+                    'coeff_2': coeff_2,
+                    'coeff_3': coeff_3,
+                    'device': device,
+                    'location': '',
+                    'spec_notes': spec_notes,
+                    'local_count_history': local_count_history
+                },
+                full_histogram,
+                filename
+            )
+
+            time_last_save_time = time_this_save
+            time.sleep(0)
+
+    # Save and exit
+    save_queue.put(None)
+    save_thread.join()
+    p.terminate()  # Closes stream when done
+
+    with shared.write_lock:
+        shared.run_flag.clear()
+        shared.save_done.set()
+    return
+
+    #======================================================================================
+
+def queue_save_data(save_queue, meta, full_histogram, filename):
+    data = meta.copy()
+    data["filename"] = filename
+    data["full_histogram"] = full_histogram.copy()
+    save_queue.put(data)
+
+# Function to save data in a separate thread
+def save_data(save_queue):
+    while True:
+        data = save_queue.get()
+        if data is None:
+            break
+        t0                  = data['t0']
+        t1                  = data['t1']
+        bins                = int(data['bins'])
+        local_counts        = data['local_counts']
+        dropped_counts      = data['dropped_counts']
+        local_elapsed       = data['local_elapsed']
+        coeff_1             = data['coeff_1']
+        coeff_2             = data['coeff_2']
+        coeff_3             = data['coeff_3']
+        device              = data['device']
+        location            = data['location']
+        spec_notes          = data['spec_notes']
+        local_count_history = data['local_count_history']
+        gps                 = data.get('gps')
+
+        if 'filename' in data and 'full_histogram' in data:
+            filename        = data['filename']
+            full_histogram  = data['full_histogram']
+            fn.write_histogram_npesv2(t0, t1, bins, local_counts, dropped_counts, local_elapsed, filename, full_histogram, coeff_1, coeff_2, coeff_3, device, location, spec_notes)
+            fn.write_cps_json(filename, local_count_history, local_elapsed, local_counts, dropped_counts)
+
+        if 'filename' in data and 'last_minute' in data:
+            filename = data['filename']
+            last_minute  = data['last_minute']
+            fn.update_json_hmp_file(t0, t1, bins, local_counts, local_elapsed, filename, last_minute, coeff_1, coeff_2, coeff_3, device, gps)
+            #fn.write_cps_json(filename, local_count_history, local_elapsed, local_counts, dropped_counts)
+
+
+# Appends 1-second slices to shared.histogram_hmp (mode 3 = waterfall)
+def update_mode_3_data(
+    mode,
+    shared,
+    full_histogram,         # absolute counts per bin (running total)
+    last_histogram,         # same length as full_histogram; mutated in place
+    hmp_buffer,             # list of per-second delta rows (lists)
+    interval_counter,       # int: seconds accumulated since last flush
+    t_interval,             # int: aggregate period in seconds
+    bins,                   # int: expected number of bins (after compression)
+    now,                    # (unused here; kept for signature compatibility)
+    save_queue,             # queue for JSON saver thread
+    meta,                   # dict with metadata for save thread
+    filename            # base name for JSON file (without _hmp.json)
+):
+    """
+    Returns: (interval_counter, last_histogram)
+
+    Behavior:
+      - Build a 1s delta row from the absolute counters.
+      - Buffer each 1s row.
+      - Every t_interval seconds, aggregate buffered rows into one slice,
+        push to shared.histogram_hmp (UI ring), and enqueue a save job:
+          data["filename"] = filename
+          data["last_minute"]  = aggregated      # keeps existing save_data contract
+    """
+    # Only active for waterfall mode
+    if mode != 3:
+        return interval_counter, last_histogram
+
+    # --- Defensive shape handling (bins may change if compression changed) ---
+    if len(full_histogram) < bins:
+        # pad right if the device produced fewer bins unexpectedly
+        full_histogram = list(full_histogram) + [0] * (bins - len(full_histogram))
+    elif len(full_histogram) > bins:
+        full_histogram = full_histogram[:bins]
+
+    if len(last_histogram) != bins:
+        # Reset delta baseline if bins changed
+        last_histogram[:] = [0] * bins
+        hmp_buffer.clear()
+        interval_counter = 0
+
+    # --- Build 1-second delta row (no locks; clamp negatives to 0) ---
+    interval_hist = [max(full_histogram[i] - last_histogram[i], 0) for i in range(bins)]
+    last_histogram[:] = full_histogram
+
+    # Buffer only if there was activity
+    if any(interval_hist):
+        hmp_buffer.append(interval_hist)
+    # else: stay quiet (no data this second)
+
+    interval_counter += 1
+
+    # --- Flush every t_interval seconds ---
+    if interval_counter >= max(1, int(t_interval)):
+        if hmp_buffer:
+            # Aggregate N seconds into one slice (per-bin sums)
+            aggregated = [sum(col) for col in zip(*hmp_buffer)]
+
+            from collections import deque
+
+            # Take a snapshot of the most recent GPS fix (could be None)
+            # dict(...) makes a shallow copy so it doesn't mutate later.
+            with shared.write_lock:
+                if not hasattr(shared, "histogram_hmp") or not hasattr(shared.histogram_hmp, "append"):
+                    shared.histogram_hmp = deque(maxlen=getattr(shared, "ring_len_hmp", 3600))
+
+                if not hasattr(shared, "gps_hmp") or not hasattr(shared.gps_hmp, "append"):
+                    shared.gps_hmp = deque(maxlen=getattr(shared, "ring_len_hmp", 3600))
+
+                # 1) append the interval spectrum slice
+                shared.histogram_hmp.append(aggregated)
+
+                # 2) append ONE gps row for the same slice (same lock => indices always match)
+                fix = getattr(shared, "last_gps_fix", None)
+                ok = isinstance(fix, dict) and fix.get("fix") and (fix.get("lat") is not None) and (fix.get("lon") is not None)
+
+                row = {
+                    "lat": fix.get("lat") if ok else None,
+                    "lon": fix.get("lon") if ok else None,
+                    "t": shared.elapsed,
+                }
+
+                shared.gps_hmp.append(row)
+
+            #print(f"[GPS/HMP] rows hist={len(shared.histogram_hmp)} gps={len(shared.gps_hmp)} last={row}")
+
+
+            # Enqueue save job (keeps your existing saver contract)
+            payload = meta.copy()
+            payload["filename"] = filename
+            payload["last_minute"]  = aggregated
+            payload["gps"]          = row   # <-- add this now (harmless if saver ignores it)
+            save_queue.put(payload)
+
+            # Reset buffer and counter
+            hmp_buffer.clear()
+            interval_counter = 0
+        else:
+            interval_counter = 0
+
+    return interval_counter, last_histogram
+
+
+
+#====================================================================================================
